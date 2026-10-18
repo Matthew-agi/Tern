@@ -129,3 +129,7 @@ provenance belong here. Training data, benchmark inputs, optimizer files and raw
 GPU traces are excluded.
 
 The [RTX deployment test](docs/rtx-validation.md) records a successful fresh Docker build, 59 ms median public-sample serial latency and 34.7K input tokens/s in warmed concurrent bursts. Cross-GPU and cross-batch probability differences remain disclosed; this is not private leaderboard acceptance.
+
+## Decision Index submission
+
+The model, results and code are public. [Submission PR #227](https://github.com/apolinario/decision-index/pull/227) is open for review; leaderboard inclusion and private quality/latency checks remain pending.

@@ -26,7 +26,7 @@ See [the restart investigation](numerical-reproducibility.md) for the workspace 
 
 ## Reviewer startup
 
-Use the pinned repository's normal `docker compose up --build` on a Linux x86_64 RTX PRO 6000 Blackwell 96GB host with a CUDA-12.9-compatible driver and NVIDIA Container Toolkit. The launcher downloads and SHA-verifies the 33 inference files, compiles, warms up and exposes `/v1/systemone`. Private repository access is required until the owner publishes or grants reviewer access. Use the BF16 RTX profile for this submission; H100 FP8 is a separate personal experiment.
+Use the pinned repository's normal `docker compose up --build` on a Linux x86_64 RTX PRO 6000 Blackwell 96GB host with a CUDA-12.9-compatible driver and NVIDIA Container Toolkit. The launcher downloads and SHA-verifies the 33 inference files, compiles, warms up and exposes `/v1/systemone`. The repositories are public; no access token is required. Use the BF16 RTX profile for this submission; H100 FP8 is a separate personal experiment.
 
 No benchmark inputs, labels, model weights, credentials or raw GPU traces are included in this code repository. The public suite and private test requirements are described by the [official submission rules](https://github.com/apolinario/decision-index#submitting-a-model-to-the-leaderboard).
 
@@ -37,3 +37,7 @@ A final upstream check found [commit `2d7791c`](https://github.com/apolinario/de
 A separate supplemental check keeps the same selected request IDs, schemas, labels, model and head, but stops each history at its recorded current user turn, matching the corrected builder's snapshot semantics. All 2,500 requests succeeded. **Corrected SGD macro-F1 is 0.7033**, versus **0.1052** in the frozen RTX run (original A100: 0.1071). Independent local rescoring reproduced the corrected benchmark summary exactly. [Supplemental results](https://huggingface.co/datasets/matthewagi/Tern-35B-A3B-Decision-Index/blob/main/diagnostics/sgd-history-fix/summary.json) include provenance and separate predictions.
 
 SGD is excluded from the headline index: **59.01 public / 68.93 raw remains unchanged**. The complete canonical frozen runs and their payload hashes are preserved untouched. The supplemental corrected requests have different payload hashes and are not silently substituted into those runs. Upstream HEAD checked was `f5a6e4fd85fed05e77878dfc4966d0568bfb45ec`; its scoring/edition files and published suite hash declarations are unchanged from the frozen scorer pin. This discrepancy is disclosed for maintainer review. No benchmark input text is redistributed.
+
+## Submission status
+
+[Decision Index PR #227](https://github.com/apolinario/decision-index/pull/227) is open. Public release and submission are complete; maintainer review and private quality/latency checks remain pending.
