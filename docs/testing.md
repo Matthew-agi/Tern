@@ -78,3 +78,5 @@ into a benchmark submission.
 - Final-checkpoint H100 FP8 quality and the maintainers' private RTX quality/latency acceptance remain pending.
 
 For RTX restart checks, compare fresh processes, not only repeated requests in one process. The [workspace investigation](numerical-reproducibility.md) records the fixed execution setting, rollback control, head hash checks and labeled smoke scope.
+
+The [complete RTX public evaluation](decision-index-rtx.md) includes independent rescoring and a post-evaluation serial repeatability check. The Docker launcher applies the tested workspace setting without a manual environment step.

@@ -15,7 +15,7 @@ are retained. This repo does not change Hub visibility or submit benchmark resul
 **Tested on RTX PRO 6000 Blackwell 96GB:** a fresh Docker build, GPU kernel checks,
 HTTP protocol, and warmed latency/throughput completed. [Numerical limits](docs/rtx-validation.md)
 remain: serial repeats were exact, but cross-GPU and cross-batch outputs differed.
-A100/H100 profiles reproduce recorded launch settings with the evidence limits below.
+The default Docker launcher includes the cuBLAS workspace fix automatically. A100/H100 profiles reproduce recorded launch settings with the evidence limits below.
 
 ## Start on RTX PRO 6000
 
@@ -62,7 +62,7 @@ TERN_PROFILE=h100-bf16 TERN_GPU=0 docker compose up --build
 
 | Profile | Execution | Recorded input throughput | Evidence boundary |
 |---|---|---:|---|
-| `rtx-pro-6000` (default) | BF16, Triton recurrent kernels, original head batching | 34,667 tok/s mean of 3 warmed bursts | Final step 1674; [deployment test and numerical differences](docs/rtx-validation.md), not private Index acceptance |
+| `rtx-pro-6000` (default) | BF16, Triton recurrent kernels, original head batching | 34,787 tok/s mean of 3 warmed bursts | Final step 1674; [deployment test and numerical differences](docs/rtx-validation.md), not private Index acceptance |
 | `a100` | BF16, A100 tuned MoE tiles | 24,514 tok/s matched panel | A100 SXM4 80GB, final step 1674; measured before this repackaging |
 | `h100` | Load-time FP8, FlashInfer recurrent kernels, fused activation quantization, packed head, H100 tuned tiles | 45,010 tok/s matched panel; 47,109 sustained | H100 PCIe 80GB, **step 624**; not final-checkpoint throughput or parity |
 | `h100-bf16` | BF16 reference with original head batching | Unmeasured | Control for checking the H100 FP8 profile on final weights |
@@ -108,8 +108,7 @@ example proves API wiring; it is not a quality or performance benchmark.
 
 ## Model and evaluation
 
-The [model card](docs/model-card.md) records the completed public Decision Index
-evaluation: **59.10 public / 69.04 raw**, 140,176 successful of 140,178 requests.
+The [complete RTX public evaluation](docs/decision-index-rtx.md) scores **59.01 public / 68.93 raw**, with 140,176 successful requests, two declared capacity rejections and zero errors. Independent rescoring reproduced every score field. The original A100 result remains **59.10 / 69.04**. See the [model card](docs/model-card.md) for both runs.
 This is not an accepted leaderboard placement or the private Full score.
 Cross-batch numerical variation and training/development overlap are disclosed;
 we do not promise identical probabilities across batches or GPU types.

@@ -42,3 +42,5 @@ The launcher change passes all **29 CPU tests**, including inherited-workspace o
 The three warmed matched 257-request throughput runs measured **34,889.5 / 34,788.3 / 34,683.6 input tokens/s**, versus the original mean of 34,666.5. This shows no observed performance penalty; the small difference is within ordinary run variation and is not claimed as a speedup. Startup, compilation and idle time are excluded. Serial versus concurrent output variation remains: **3/344 selected answers**, maximum probability difference **0.086051**. Serial predictions before and after that load remained exactly identical.
 
 The fixed container is healthy and retained for follow-up. No diagnostic mounts, monkeypatches or HF token remain in the production container. The original failure evidence, controls, smoke scoring code and private trace captures are retained in the investigation directory outside GitHub.
+
+The subsequent [complete RTX public evaluation](decision-index-rtx.md) extends this smoke check to the full suite and compares it with the original A100 results.

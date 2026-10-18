@@ -16,37 +16,29 @@ Tern is a typed decision model: supply a state and named questions with their co
 
 This release is optimizer checkpoint 1674, trained on 499,999,909 tokens. It contains merged training-rounded BF16 backbone/adapter weights and a trained head stored in FP32. The frozen serving path precasts selected head parameters to BF16 and uses BF16 autocast. All 40 layers and eight routed experts are active. No early exit, expert pruning, external tools, retrieval or test-time augmentation is used.
 
-Use the included [runtime](../README.md). A stock Transformers causal-language-model loader is not sufficient for the trained head. The runtime exposes `/v1/systemone`, including every supplied question and option. Capacity is 32,768 encoded tokens for the complete state and question set; oversized inputs are rejected, never truncated.
+Use the tested [Tern Docker serving repository](https://github.com/Matthew-agi/Tern/tree/9723b745367735473f03c93a6f3639c4fb2c8c3f) for RTX PRO 6000, A100 and H100 profiles. The default RTX BF16 profile includes the cuBLAS workspace reproducibility setting automatically; no manual patch is required. GitHub and HF access are required while these repositories are private. The original [frozen A100 runtime](https://huggingface.co/matthewagi/Tern-35B-A3B/blob/main/runtime/README.md) is retained for provenance; the dedicated repository is the RTX submission entrypoint. The optional H100 FP8 profile is a separate experiment. A stock Transformers causal-language-model loader does not implement the trained decision head. Capacity is 32,768 encoded tokens for the entire state and all questions/options; oversized requests are rejected without truncation.
 
 ## Public evaluation
 
-The complete Decision Index 0.3 public evaluation scores **59.10** (raw index **69.04**): **140,176 successful requests and two unsupported BRIGHT requests**, out of 140,178. All 37 index benchmarks and six auxiliary benchmarks are included. The official scorer reports `complete: true`; an independent local rescore reproduced every score field. [Results repository](https://huggingface.co/datasets/matthewagi/Tern-35B-A3B-Decision-Index). This is not an official Full score or accepted leaderboard placement: maintainers evaluate the private portions and single-request latency themselves.
+| Complete public 0.3 run | Public index | Raw index | Requests |
+| --- | ---: | ---: | ---: |
+| RTX PRO 6000, fixed-workspace Docker | 59.01 | 68.93 | 140,178 |
+| Original A100 | 59.10 | 69.04 | 140,178 |
 
-| Auxiliary benchmark | Requests | Metric | Result |
-|---|---:|---|---:|
-| MMLU | 14,033 | Accuracy | 85.71% |
-| ARC-Easy | 2,376 | Accuracy | 98.99% |
-| ARC-Challenge | 1,172 | Accuracy | 96.84% |
-| RouterBench | 10,000 | Selected quality | 0.7954 |
-| SGD/SGD-X | 2,500 | Macro-F1 | 0.1071 |
-| SimpleBench | 10 | Accuracy | 30.00% |
+The fresh RTX run includes all 37 index and six auxiliary benchmarks: 140,176 successful requests, 2 unsupported BRIGHT requests, and zero errors. The official scorer reports `complete: true`, and an independent local rescore reproduces every score field. All request IDs and payload hashes match the frozen suite. Complete predictions, exact settings, per-benchmark metrics and comparisons are in the [results repository](https://huggingface.co/datasets/matthewagi/Tern-35B-A3B-Decision-Index), under `runs/step1674-rtx-top8/`. The older A100 run remains unchanged under `runs/step1674-top8/`.
 
-Auxiliary metrics are excluded from the headline index. The evaluation combines the original 127,668-request run with the remaining 12,510 auxiliary requests on the same frozen weights and packaged runtime; no original predictions were replaced. All request IDs and recomputed payload hashes match the pinned complete public suite. Scorer revision and reconstruction details accompany the results.
-
-The public score has development-exposure and training-overlap limitations. See [training disclosure](training-disclosure.md). Do not describe it as an uncontaminated held-out result.
+These are public scores, not the private Full score or an accepted leaderboard placement. See [TRAINING_DISCLOSURE.md](training-disclosure.md) for public development exposure and training-overlap candidates; this is not an uncontaminated held-out claim.
 
 ## Reproducibility and limitations
 
-Tested on one NVIDIA A100-SXM4-80GB. The isolated package installation exactly reproduced the previous environment's serial probabilities on 65 requests / 586 fields; repeated serial execution was identical. Changing serial execution to concurrent batches changed 2/586 decisions, with maximum probability difference 0.118828 and mean difference 0.003615. This fails the original cross-batch probability-drift screen. No relaxed tolerance or cross-batch numerical-parity claim is made. The original native-training versus serving differences are separately documented in the result artifacts.
+The RTX launcher pins `CUBLAS_WORKSPACE_CONFIG=:4096:8`. The fixed serial panel matched across four fresh processes; head tensors and numerical source files were unchanged. This mitigates observed restart variation on that panel, not a universal determinism guarantee. Cross-GPU and cross-batch probability equivalence remain unproven. In the matched full public runs, RTX versus A100 changed 4,384/312,256 selected decisions (1.404%). Both hardware and batch scheduling differ; these effects are not separately isolated. No numerical tolerance was widened.
 
-Fresh vLLM/Triton/Inductor/extension caches compiled successfully and reproduced the serial reference probabilities exactly. A separate, explicitly warmed sample of 128 natural-length public requests on A100 measured median **62.65 ms**, mean **87.65 ms**, p80 **118.67 ms** and p95 **176.03 ms**, including HTTP, encoding and inference, excluding loading and warmup. All responses were identical between warmup and measurement.
+A separately warmed 128-request RTX serial panel after the full evaluation measured median 59.48 ms, mean 74.09 ms, p80 89.38 ms and p95 134.59 ms. These include HTTP, encoding and inference, and exclude model loading and warmup. The concurrent full-evaluation timings include queueing and are not single-request latency. Maintainers must still run their private quality and latency checks.
 
-Concurrent public evaluation uses 128 clients. Its timings are not the board's single-request measurement. RTX PRO 6000 deployment and public-sample latency were tested; see [the report](rtx-validation.md), including cross-GPU probability differences. The board's private latency gate remains unverified.
-
-The model is an experimental decision scorer. Confidence values are learned probabilities, not guarantees of correctness. It is not a generative assistant or multimodal release.
+The model is an experimental decision scorer. Its probabilities are not guarantees of correctness. It is not a generative assistant or multimodal release.
 
 ## Provenance and attribution
 
-Base revision: `Qwen/Qwen3.6-35B-A3B@995ad96eacd98c81ed38be0c5b274b04031597b0`. The owner has selected Apache-2.0 for Tern. The base model's Apache-2.0 license and attribution are preserved, as is the CLEF-derived runtime's original notice. Training-source evidence remains in the disclosure; this license choice does not rewrite source dataset terms. This GitHub package does not itself change the privately staged Hub repository or submit a benchmark PR.
+Base revision: `Qwen/Qwen3.6-35B-A3B@995ad96eacd98c81ed38be0c5b274b04031597b0`. Tern model weights, the trained head and bundled Tern code are licensed under [Apache-2.0](../LICENSE). The base model's original license is preserved in [BASE_MODEL_LICENSE](BASE_MODEL_LICENSE), and the CLEF-derived runtime retains its [original notice](../src/kev_vllm/CLEF_LICENSE). See [NOTICE](../NOTICE) and [TRAINING_DISCLOSURE.md](training-disclosure.md) for attribution and training-source evidence. The license choice does not rewrite source dataset terms.
 
-The downloaded `export.json` records the checkpoint and training/validation fingerprints. The packaged [release manifest](../src/tern/configs/release.json) records all inference-file hashes and bytes. Optimizer state, training data, benchmark inputs and private traces are not included. GPU results above come from the original A100 package; the new RTX launcher has separate [deployment evidence](rtx-validation.md), while final-checkpoint H100 validation remains pending.
+`export.json` records the checkpoint and training/validation fingerprints. `model-file-sha256.json` records the inference-file bytes. Optimizer state, training data, benchmark inputs and private traces are not included.

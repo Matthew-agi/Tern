@@ -1,5 +1,7 @@
 # RTX PRO 6000 deployment validation — 2026-10-18
 
+**Historical initial deployment report.** The later [full RTX evaluation](decision-index-rtx.md) and [workspace investigation](numerical-reproducibility.md) supersede the pending full-evaluation and restart status below. Original measurements are retained for provenance.
+
 > Follow-up: the RTX launcher now pins cuBLAS workspace selection. See the [restart investigation and smoke quality check](numerical-reproducibility.md). The initial observations below are retained as historical evidence.
 
 Tested code: `2e95f9cf155f7fb1f393e48fe43f2281d61b5b85`, downloaded as a fresh GitHub archive.
