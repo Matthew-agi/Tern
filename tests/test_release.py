@@ -117,3 +117,9 @@ def test_compose_is_single_gpu_and_preserves_cache():
     assert service["deploy"]["resources"]["reservations"]["devices"][0]["device_ids"] == ["${TERN_GPU:-0}"]
     assert service["volumes"] == ["tern-cache:/cache/tern"]
     assert "/ready" in service["healthcheck"]["test"][-1]
+
+
+def test_rtx_worker_pins_workspace_despite_inherited_setting(monkeypatch, tmp_path):
+    monkeypatch.setenv("CUBLAS_WORKSPACE_CONFIG", ":16:8")
+    env = worker_environment(profile("rtx-pro-6000"), tmp_path / "model", tmp_path, 8101, "tern", "0")
+    assert env["CUBLAS_WORKSPACE_CONFIG"] == ":4096:8"

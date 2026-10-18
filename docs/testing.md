@@ -76,3 +76,5 @@ into a benchmark submission.
 - H100 fast settings originate from the checkpoint-624 campaign.
 - The new Docker image, RTX PRO 6000 startup, HTTP contract and warmed latency/throughput were tested on 2026-10-18. See [results and numerical limits](rtx-validation.md). Cross-GPU and cross-batch probability equivalence failed; serial repeats were exact.
 - Final-checkpoint H100 FP8 quality and the maintainers' private RTX quality/latency acceptance remain pending.
+
+For RTX restart checks, compare fresh processes, not only repeated requests in one process. The [workspace investigation](numerical-reproducibility.md) records the fixed execution setting, rollback control, head hash checks and labeled smoke scope.

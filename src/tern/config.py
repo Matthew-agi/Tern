@@ -61,6 +61,10 @@ def worker_environment(p, model, cache, backend_port, name, gpu):
                VLLM_CACHE_ROOT=str(cache / "vllm"), TRITON_CACHE_DIR=str(cache / "triton"),
                TORCHINDUCTOR_CACHE_DIR=str(cache / "inductor"),
                TORCH_EXTENSIONS_DIR=str(cache / "extensions"))
+    # Pin cuBLAS workspace selection before either worker imports CUDA.
+    # This stabilizes RTX serial probabilities across fresh processes.
+    if p.get("cublas_workspace_config"):
+        env["CUBLAS_WORKSPACE_CONFIG"] = p["cublas_workspace_config"]
     if p["tuning"]:
         env["VLLM_TUNED_CONFIG_FOLDER"] = str(CONFIGS / "tuning" / p["tuning"])
     return env

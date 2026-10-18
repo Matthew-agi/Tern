@@ -10,9 +10,10 @@
   "expert_act_quant_fusion": false,
   "concurrency": 128,
   "tuning": null,
-  "validation": "Preparation only: frozen BF16 path; RTX PRO 6000 GPU validation pending.",
+  "validation": "RTX PRO 6000 deployment tested; pinned cuBLAS workspace for serial restart reproducibility. Cross-GPU and cross-batch differences remain disclosed.",
   "batch_tokens": 32768,
   "max_model_len": 32768,
   "max_seqs": 256,
-  "capture_tokens": 16384
+  "capture_tokens": 16384,
+  "cublas_workspace_config": ":4096:8"
 }

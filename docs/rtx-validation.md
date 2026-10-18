@@ -1,5 +1,7 @@
 # RTX PRO 6000 deployment validation — 2026-10-18
 
+> Follow-up: the RTX launcher now pins cuBLAS workspace selection. See the [restart investigation and smoke quality check](numerical-reproducibility.md). The initial observations below are retained as historical evidence.
+
 Tested code: `2e95f9cf155f7fb1f393e48fe43f2281d61b5b85`, downloaded as a fresh GitHub archive.
 Model snapshot: `05db86f1d322fd1eec865f769a04e6ddeabb8187`; all 33 inference files verified against the release SHA-256 manifest. Full 40 layers, eight active experts, merged BF16 weights and the unchanged trained head.
 

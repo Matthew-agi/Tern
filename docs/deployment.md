@@ -65,3 +65,5 @@ The model file manifest pins all 33 inference files, totaling 69,778,082,886
 bytes, including config/tokenizer/head. An existing local snapshot is accepted
 only if it matches. HF README/license metadata are not part of the inference
 allowlist, so a model-card edit cannot silently change the served tensors.
+
+The RTX profile pins `CUBLAS_WORKSPACE_CONFIG=:4096:8` before worker startup. This stabilized serial outputs across fresh processes in the [reproducibility investigation](numerical-reproducibility.md). It does not guarantee cross-batch or cross-GPU identity; A100/H100 execution settings remain unchanged.
