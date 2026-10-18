@@ -28,12 +28,10 @@ The 48GB RTX 6000 Ada is a different card and is not supported by this BF16 prof
 ```bash
 git clone https://github.com/Matthew-agi/Tern.git
 cd Tern
-# While the model is private, provide a read token with access to its HF repo.
-read -r -s -p "Hugging Face read token: " HF_TOKEN; export HF_TOKEN; echo
 docker compose up --build
 ```
 
-Git authentication is also needed while this GitHub repo is private. On first
+The code and model are public; no access token is required. On first
 launch, Tern downloads only the 33 pinned inference files, verifies every hash,
 loads the model, compiles kernels and runs a synthetic inference. Wait for
 `Tern READY` or a healthy container before sending work. Persistent caches are
