@@ -109,6 +109,7 @@ example proves API wiring; it is not a quality or performance benchmark.
 ## Model and evaluation
 
 The [complete RTX public evaluation](docs/decision-index-rtx.md) scores **59.01 public / 68.93 raw**, with 140,176 successful requests, two declared capacity rejections and zero errors. Independent rescoring reproduced every score field. The original A100 result remains **59.10 / 69.04**. See the [model card](docs/model-card.md) for both runs.
+A separate corrected SGD auxiliary check scores **0.7033 macro-F1**; the frozen suite had an upstream dialogue-history bug. See the [disclosure](docs/decision-index-rtx.md#upstream-sgd-auxiliary-input-correction); the headline index is unaffected.
 This is not an accepted leaderboard placement or the private Full score.
 Cross-batch numerical variation and training/development overlap are disclosed;
 we do not promise identical probabilities across batches or GPU types.
