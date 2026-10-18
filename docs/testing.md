@@ -74,6 +74,5 @@ into a benchmark submission.
 
 - A100 frozen source and settings originate from the completed final evaluation.
 - H100 fast settings originate from the checkpoint-624 campaign.
-- New container build, RTX PRO 6000 compatibility, cold-cache GPU startup,
-  final-checkpoint H100 FP8 quality and new-package hardware performance are
-  pending. No performance result is attributed to this new package yet.
+- The new Docker image, RTX PRO 6000 startup, HTTP contract and warmed latency/throughput were tested on 2026-10-18. See [results and numerical limits](rtx-validation.md). Cross-GPU and cross-batch probability equivalence failed; serial repeats were exact.
+- Final-checkpoint H100 FP8 quality and the maintainers' private RTX quality/latency acceptance remain pending.

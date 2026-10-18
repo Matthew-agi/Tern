@@ -41,7 +41,7 @@ Tested on one NVIDIA A100-SXM4-80GB. The isolated package installation exactly r
 
 Fresh vLLM/Triton/Inductor/extension caches compiled successfully and reproduced the serial reference probabilities exactly. A separate, explicitly warmed sample of 128 natural-length public requests on A100 measured median **62.65 ms**, mean **87.65 ms**, p80 **118.67 ms** and p95 **176.03 ms**, including HTTP, encoding and inference, excluding loading and warmup. All responses were identical between warmup and measurement.
 
-Concurrent public evaluation uses 128 clients. Its timings are not the board's single-request measurement. RTX PRO 6000 compatibility and the board's private latency gate have not been verified on that hardware.
+Concurrent public evaluation uses 128 clients. Its timings are not the board's single-request measurement. RTX PRO 6000 deployment and public-sample latency were tested; see [the report](rtx-validation.md), including cross-GPU probability differences. The board's private latency gate remains unverified.
 
 The model is an experimental decision scorer. Confidence values are learned probabilities, not guarantees of correctness. It is not a generative assistant or multimodal release.
 
@@ -49,4 +49,4 @@ The model is an experimental decision scorer. Confidence values are learned prob
 
 Base revision: `Qwen/Qwen3.6-35B-A3B@995ad96eacd98c81ed38be0c5b274b04031597b0`. The owner has selected Apache-2.0 for Tern. The base model's Apache-2.0 license and attribution are preserved, as is the CLEF-derived runtime's original notice. Training-source evidence remains in the disclosure; this license choice does not rewrite source dataset terms. This GitHub package does not itself change the privately staged Hub repository or submit a benchmark PR.
 
-The downloaded `export.json` records the checkpoint and training/validation fingerprints. The packaged [release manifest](../src/tern/configs/release.json) records all inference-file hashes and bytes. Optimizer state, training data, benchmark inputs and private traces are not included. GPU results above come from the original A100 package; this new launcher and the RTX/H100 final-checkpoint deployments still require hardware validation.
+The downloaded `export.json` records the checkpoint and training/validation fingerprints. The packaged [release manifest](../src/tern/configs/release.json) records all inference-file hashes and bytes. Optimizer state, training data, benchmark inputs and private traces are not included. GPU results above come from the original A100 package; the new RTX launcher has separate [deployment evidence](rtx-validation.md), while final-checkpoint H100 validation remains pending.

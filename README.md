@@ -12,10 +12,10 @@ pinned by revision and SHA-256. Code is Apache-2.0; the owner has selected
 Apache-2.0 for Tern. Original dependency notices and [training disclosures](docs/training-disclosure.md)
 are retained. This repo does not change Hub visibility or submit benchmark results.
 
-**Prepared for RTX PRO 6000 Blackwell 96GB; GPU validation of this new package is
-pending.** A100/H100 profiles reproduce recorded launch settings, with the
-evidence limits below. This package has not yet been built with Docker or tested
-on the target GPU. A working local CPU test suite is not a GPU compatibility claim.
+**Tested on RTX PRO 6000 Blackwell 96GB:** a fresh Docker build, GPU kernel checks,
+HTTP protocol, and warmed latency/throughput completed. [Numerical limits](docs/rtx-validation.md)
+remain: serial repeats were exact, but cross-GPU and cross-batch outputs differed.
+A100/H100 profiles reproduce recorded launch settings with the evidence limits below.
 
 ## Start on RTX PRO 6000
 
@@ -60,9 +60,9 @@ TERN_PROFILE=h100 TERN_GPU=0 docker compose up --build
 TERN_PROFILE=h100-bf16 TERN_GPU=0 docker compose up --build
 ```
 
-| Profile | Execution | Historical input throughput | Evidence boundary |
+| Profile | Execution | Recorded input throughput | Evidence boundary |
 |---|---|---:|---|
-| `rtx-pro-6000` (default) | BF16, Triton recurrent kernels, original head batching | Unmeasured | Blackwell 96GB validation pending |
+| `rtx-pro-6000` (default) | BF16, Triton recurrent kernels, original head batching | 34,667 tok/s mean of 3 warmed bursts | Final step 1674; [deployment test and numerical differences](docs/rtx-validation.md), not private Index acceptance |
 | `a100` | BF16, A100 tuned MoE tiles | 24,514 tok/s matched panel | A100 SXM4 80GB, final step 1674; measured before this repackaging |
 | `h100` | Load-time FP8, FlashInfer recurrent kernels, fused activation quantization, packed head, H100 tuned tiles | 45,010 tok/s matched panel; 47,109 sustained | H100 PCIe 80GB, **step 624**; not final-checkpoint throughput or parity |
 | `h100-bf16` | BF16 reference with original head batching | Unmeasured | Control for checking the H100 FP8 profile on final weights |
@@ -129,3 +129,5 @@ See [architecture](docs/architecture.md) for how the backbone, trained head and
 API connect. Large weights remain on HF; code, launch profiles and compact
 provenance belong here. Training data, benchmark inputs, optimizer files and raw
 GPU traces are excluded.
+
+The [RTX deployment test](docs/rtx-validation.md) records a successful fresh Docker build, 59 ms median public-sample serial latency and 34.7K input tokens/s in warmed concurrent bursts. Cross-GPU and cross-batch probability differences remain disclosed; this is not private leaderboard acceptance.
