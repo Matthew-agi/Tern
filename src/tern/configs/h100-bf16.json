@@ -1,0 +1,18 @@
+{
+  "id": "h100-bf16",
+  "gpu_contains": "H100",
+  "minimum_memory_mib": 78000,
+  "quantization": null,
+  "gdn_backend": "triton",
+  "head_batch_size": 16,
+  "head_batch_tokens": 16384,
+  "packed_head_projection": false,
+  "expert_act_quant_fusion": false,
+  "concurrency": 128,
+  "tuning": null,
+  "validation": "BF16 reference for H100 comparisons; final checkpoint GPU validation pending.",
+  "batch_tokens": 32768,
+  "max_model_len": 32768,
+  "max_seqs": 256,
+  "capture_tokens": 16384
+}

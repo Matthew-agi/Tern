@@ -1,0 +1,15 @@
+torch==2.13.0+cu129
+torchvision==0.28.0+cu129
+torchaudio==2.11.0+cu129
+vllm @ https://github.com/vllm-project/vllm/releases/download/v0.30.0/vllm-0.30.0%2Bcu129-cp38-abi3-manylinux_2_28_x86_64.whl
+transformers==5.19.0
+triton==3.7.1
+flashinfer-python==0.6.18.post1
+fastapi==0.136.3
+uvicorn==0.54.0
+httpx==0.28.1
+safetensors==0.8.0
+torchcodec==0.17.0+cpu
+numpy==2.3.5
+packaging==26.3
+setuptools==80.10.2

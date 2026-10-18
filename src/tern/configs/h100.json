@@ -1,0 +1,18 @@
+{
+  "id": "h100",
+  "gpu_contains": "H100",
+  "minimum_memory_mib": 78000,
+  "quantization": "fp8_per_channel",
+  "gdn_backend": "flashinfer",
+  "head_batch_size": 32,
+  "head_batch_tokens": 32768,
+  "packed_head_projection": true,
+  "expert_act_quant_fusion": true,
+  "concurrency": 256,
+  "tuning": "h100",
+  "validation": "Highest measured full-depth/top8 H100 path at checkpoint 624, not final checkpoint 1674. FP8 and packed-head arithmetic can change probabilities. Final checkpoint validation pending.",
+  "batch_tokens": 32768,
+  "max_model_len": 32768,
+  "max_seqs": 256,
+  "capture_tokens": 16384
+}

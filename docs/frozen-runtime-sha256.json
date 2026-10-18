@@ -1,0 +1,22 @@
+{
+  "serve_clef_api.py": "884a24d3113fc0ff44ba3c67036c78542e1a4c79a90ab4f9e8eb696299d9a3ce",
+  "kev_vllm/stateless_contract.py": "82ad419bc46dc74a630b6df4628387ffd0482092d446b3b090ef0df5c0808bca",
+  "kev_vllm/expert_act_quant.py": "e7e08ec2680997ff752685dd2ffc830e4c4fc2f83562f9d784ef639b7978f445",
+  "kev_vllm/CLEF_LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "kev_vllm/clef_batched.py": "147516af28ef949022b474138ea3bae51a4ac4ffd3853b87398354c25b2e1f3d",
+  "kev_vllm/stateless_kernels.py": "113914d1b028016c0683581b3090a35919eb5f5e30948995c9f9b3ed3f65e155",
+  "kev_vllm/stateless_prefill.py": "53a0cb31e0cc1d7e83f4927545864053dc485ec3aaa5635473f98b3e91875952",
+  "kev_vllm/__init__.py": "c55bf5e374ef9b4193ed602b05f29e9b52b160d43534fae32cc67db614c90671",
+  "kev_vllm/tokenization.py": "d3f4be165f3bd9bd9ee2be6371a58364c5abebb2c5107cc356a07225419f5fed",
+  "kev_vllm/submission_pipeline.py": "46a7c25d212dc275355253fa3996d16d9588a0eb50e7e1b0e0901d1f62f57595",
+  "kev_vllm/clef_encoding.py": "55033f104f4f4ac3e047d62aadf64ce8c83d4971f5ae17518a95b79574eaca3c",
+  "kev_vllm/compact_lora.py": "d1573ffedc8a35af1c8afbef7b32c623a3eeeff3c67e84b950d6be78d6c80ad0",
+  "kev_vllm/clef_model.py": "631b5345f23f43057651d26f737c4e28eb1691b269a15d323d22bee472fcc94f",
+  "kev_vllm/clef_schema.py": "92c9f79201d411d26efea2181912bd0d998a3a978070da8b68abdac475677073",
+  "kev_vllm/_stateless_triton.py": "fa248ba1016e27d31d04c74adae1b57efc1a679cf765348ecd3ce137c2bdba28",
+  "kev_vllm/expert_reference_routing.py": "a5b373ebd41bec74b23dc3fd8a64423f769b7ea9904661565fa6afd3b1b0a5b1",
+  "kev_vllm/clef_head_graph.py": "d42e9679004a95872490f31f640c3615b53d37b798f86509113f76e49bc632de",
+  "kev_vllm/schema_cache.py": "a3c79e9aa3e1473a22bca097bd46aed5ff65325c64adc3717461ae7495210696",
+  "kev_vllm/batch_encoding.py": "1d8f556f8ffba33bf3af6165f3e2944e4adf38c587f639282e120e5cf4056db2",
+  "kev_vllm/stateless_sources.json": "dd6a76c4c1916e332332ae528f8f7430cde2a5ddaf373d715c7a65c71c9bf53c"
+}

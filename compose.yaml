@@ -1,0 +1,32 @@
+services:
+  tern:
+    image: tern-serving:local
+    build: .
+    platform: linux/amd64
+    init: true
+    shm_size: 16gb
+    stop_grace_period: 60s
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      TERN_CACHE_DIR: /cache/tern
+      HF_HOME: /cache/tern/hf-home
+    volumes:
+      - tern-cache:/cache/tern
+    ports:
+      - "127.0.0.1:${TERN_PORT:-8000}:8000"
+    command: ["serve", "--profile", "${TERN_PROFILE:-rtx-pro-6000}", "--gpu", "0", "--host", "0.0.0.0"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["${TERN_GPU:-0}"]
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=10)"]
+      interval: 30s
+      timeout: 15s
+      start_period: 30m
+      retries: 3
+volumes:
+  tern-cache:

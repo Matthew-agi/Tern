@@ -1,0 +1,15 @@
+Tern serving
+Copyright 2026 Matthew-agi and contributors
+
+Tern uses a Qwen3.6-35B-A3B backbone from the Qwen Team.
+Base: https://huggingface.co/Qwen/Qwen3.6-35B-A3B
+Base revision: 995ad96eacd98c81ed38be0c5b274b04031597b0
+Its original Apache-2.0 license is preserved in docs/BASE_MODEL_LICENSE.
+
+The frozen runtime includes CLEF-derived joint schema head and encoding code.
+Its original Apache-2.0 license is preserved in src/kev_vllm/CLEF_LICENSE.
+Historical module names remain to preserve compatibility and provenance.
+
+vLLM, PyTorch, Triton, FlashInfer and other dependencies retain their own
+licenses. No ownership of those projects is claimed. Model weights are
+downloaded separately from the pinned Hugging Face repository.

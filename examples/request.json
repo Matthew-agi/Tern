@@ -1,0 +1,11 @@
+{
+  "model": "tern",
+  "state": "The invoice status is paid.",
+  "questions": {
+    "status": {
+      "type": "choice",
+      "instructions": "What is the invoice status?",
+      "criteria": {"paid": "Paid", "unpaid": "Unpaid"}
+    }
+  }
+}

@@ -1,0 +1,4 @@
+include LICENSE NOTICE README.md Dockerfile compose.yaml requirements.in requirements.lock
+recursive-include docs *.md *.json BASE_MODEL_LICENSE
+recursive-include examples *.json
+recursive-include tests *.py

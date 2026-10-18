@@ -1,0 +1,28 @@
+{
+  "checked_at_utc": "2026-10-18T14:59:40.139360+00:00",
+  "cpu_tests": {
+    "passed": 28,
+    "command": "python -m pytest -q"
+  },
+  "python_package": {
+    "wheel_and_sdist_build": "passed",
+    "frozen_files_verified_in_wheel": 20,
+    "profile_and_release_manifests_verified_in_wheel": 5,
+    "vllm_plugin_entry_point": "verified"
+  },
+  "dependency_lock": {
+    "resolved": true,
+    "target": "Linux x86_64 manylinux_2_28, Python 3.12",
+    "direct_pins": "frozen release",
+    "transitive_pins": "new resolution; GPU validation pending"
+  },
+  "container_base": {
+    "tag": "nvidia/cuda:12.9.1-devel-ubuntu24.04",
+    "amd64_manifest": "sha256:e542739fcaa4f45da5add8c4cf5769783a61628b2518304a5bbe4ace468b8c8f",
+    "registry_metadata_verified": true
+  },
+  "docker_build": "not run: Docker is unavailable on the implementation host",
+  "gpu_tests": "not run: no target GPU; RTX compatibility and final-checkpoint H100 FP8 validation pending",
+  "model_files_downloaded_in_this_task": false,
+  "model_or_head_source_changed": false
+}

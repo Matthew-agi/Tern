@@ -1,0 +1,4 @@
+* text=auto eol=lf
+# Preserve the frozen numerical sources byte-for-byte, including whitespace.
+src/kev_vllm/** -text -whitespace
+src/serve_clef_api.py -text -whitespace

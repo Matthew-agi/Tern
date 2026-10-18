@@ -1,0 +1,22 @@
+{
+  "vllm_version": "0.30.0",
+  "source": "https://github.com/vllm-project/vllm/tree/v0.30.0",
+  "sha256": {
+    "vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py": "b80f8e6f3fff442fb880aebb3209c52f814f66490009f4ac4003de603576d10a",
+    "vllm/model_executor/layers/mamba/abstract.py": "dfdc8c836894f574e41d93d76ab989cacd3d7ecf59c97a929abfa48d9364e8ad",
+    "vllm/model_executor/layers/attention/attention.py": "bc897e452f3aea603e353ca42a365d3be8836e9485d78cbf8cc4677baca2fb42",
+    "vllm/v1/worker/gpu_model_runner.py": "87c29d08c0bbf66993d8b984811e7325e35e6436242a773feb55ec88f16b2c51",
+    "vllm/v1/worker/utils.py": "0ca3ec6bf4d20076145b7fe64e564962adebedc8f75a856b517ba0b2f2d77acf",
+    "vllm/v1/attention/backend.py": "01ac364372afa75fdb22486aa3a9c7cf9aebb742e3471dfb9e0f9d9d36b734bc",
+    "vllm/v1/attention/backends/flash_attn.py": "b170a4789e18104c1bee35bea70df51abe6766693d8f4726a59f2e6f5c4282aa",
+    "vllm/third_party/flash_linear_attention/ops/chunk.py": "c105ead259e86aedc248c53e7c4cef07034d0ff12da608d80265d1dd0990803f",
+    "vllm/third_party/flash_linear_attention/ops/chunk_o.py": "3b63b836a8cc561723c23db5a528a0b474d9cd78508d610f0b348c585a889a19",
+    "vllm/third_party/flash_linear_attention/ops/chunk_delta_h.py": "1b3ad391f939d9443c6b7adb19e57fe381bd5dccea064e8417a4f85b0e713b26",
+    "vllm/model_executor/layers/fused_moe/fused_moe.py": "7072eb06237be9d33dcb0ef7101410f886a6363c98cbee70a014c68b70f639cb",
+    "vllm/model_executor/layers/fused_moe/__init__.py": "64a32665be6d5afcfbaf7a0915717267278b66b880b908b0263ea58f08e51b5e",
+    "vllm/v1/worker/workspace.py": "d21c08167d1d0d1c0cddaa80453a53a0b4dec5d81b5a537c94a21324344976b3",
+    "vllm/model_executor/layers/fused_moe/experts/triton_moe.py": "806fbccfe30f5fbd578acf773add99bdf022b12d617958bd6281aef6de369701",
+    "vllm/model_executor/layers/fused_moe/modular_kernel.py": "8dc4e0dbbf35b3aac8add63ca6f2a7bbfdadaabbd60826e24598b22c7d8e5c22",
+    "vllm/model_executor/layers/mamba/ops/causal_conv1d.py": "044d005cfe59fd0818ed421274e04f3e8dd679b8cdb64fca9f4422f2643484b2"
+  }
+}

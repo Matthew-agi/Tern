@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.env
+.cache/
+models/
+measurements/
+*.safetensors
+private-verification/
+.DS_Store
