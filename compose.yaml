@@ -8,6 +8,10 @@ services:
     stop_grace_period: 60s
     environment:
       HF_TOKEN: ${HF_TOKEN:-}
+      TERN_EXPERTS: ${TERN_EXPERTS:-}
+      TERN_EXIT_LAYER: ${TERN_EXIT_LAYER:-40}
+      TERN_NORMALIZATION_REFERENCE: ${TERN_NORMALIZATION_REFERENCE:-8}
+      TERN_ADAPTER: ${TERN_ADAPTER:-}
       TERN_CACHE_DIR: /cache/tern
       HF_HOME: /cache/tern/hf-home
     volumes:

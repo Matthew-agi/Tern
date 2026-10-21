@@ -17,6 +17,8 @@
     "vllm/v1/worker/workspace.py": "d21c08167d1d0d1c0cddaa80453a53a0b4dec5d81b5a537c94a21324344976b3",
     "vllm/model_executor/layers/fused_moe/experts/triton_moe.py": "806fbccfe30f5fbd578acf773add99bdf022b12d617958bd6281aef6de369701",
     "vllm/model_executor/layers/fused_moe/modular_kernel.py": "8dc4e0dbbf35b3aac8add63ca6f2a7bbfdadaabbd60826e24598b22c7d8e5c22",
-    "vllm/model_executor/layers/mamba/ops/causal_conv1d.py": "044d005cfe59fd0818ed421274e04f3e8dd679b8cdb64fca9f4422f2643484b2"
+    "vllm/model_executor/layers/mamba/ops/causal_conv1d.py": "044d005cfe59fd0818ed421274e04f3e8dd679b8cdb64fca9f4422f2643484b2",
+    "vllm/model_executor/layers/quantization/input_quant_fp8.py": "b16ee19f3f75affbaad6feb2099583932f8e4d5c51616b84d8aa5316a72b6ef2",
+    "vllm/model_executor/kernels/linear/scaled_mm/cutlass.py": "d01b6fe09e3c3fa3991045f6ac7b469a58a550c56426ffd8900badbbe7e5355b"
   }
 }

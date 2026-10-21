@@ -157,18 +157,27 @@ def _stateless_gdn(layer, mixed_qkv, b, a, core_attn_out):
     if not isinstance(metadata, StatelessMetadata):
         raise TypeError("Stateless GDN received stateful attention metadata")
     count = metadata.num_actual_tokens
-    conv = causal_conv_stateless(
-        mixed_qkv[:count], layer.conv1d.weight.view(layer.conv1d.weight.size(0), -1),
-        layer.conv1d.bias, metadata.query_start_loc, metadata.chunk_indices,
-        layer.activation, FLA_CHUNK_SIZE,
-    )
     flashinfer = getattr(layer, 'gdn_prefill_backend', 'triton') == 'flashinfer'
-    q, k, v, g, beta = fused_post_conv_prep(
-        conv_output=conv, a=a[:count], b=b[:count],
-        A_log=layer.A_log, dt_bias=layer.dt_bias,
-        num_k_heads=layer.num_k_heads, head_k_dim=layer.head_k_dim,
-        head_v_dim=layer.head_v_dim, apply_l2norm=True, output_g_exp=flashinfer,
-    )
+    if getattr(layer, "_clef_fused_conv_prep", False):
+        if layer.activation not in ("silu", "swish"):
+            raise ValueError("Fused convolution/preparation requires the original SiLU activation")
+        from .conv_prep_fused import fused_conv_prep
+        q, k, v, g, beta = fused_conv_prep(
+            mixed_qkv[:count], layer.conv1d.weight.view(layer.conv1d.weight.size(0), -1),
+            layer.conv1d.bias, metadata.query_start_loc, metadata.chunk_indices,
+            a[:count], b[:count], layer.A_log, layer.dt_bias, flashinfer)
+    else:
+        conv = causal_conv_stateless(
+            mixed_qkv[:count], layer.conv1d.weight.view(layer.conv1d.weight.size(0), -1),
+            layer.conv1d.bias, metadata.query_start_loc, metadata.chunk_indices,
+            layer.activation, FLA_CHUNK_SIZE,
+        )
+        q, k, v, g, beta = fused_post_conv_prep(
+            conv_output=conv, a=a[:count], b=b[:count],
+            A_log=layer.A_log, dt_bias=layer.dt_bias,
+            num_k_heads=layer.num_k_heads, head_k_dim=layer.head_k_dim,
+            head_v_dim=layer.head_v_dim, apply_l2norm=True, output_g_exp=flashinfer,
+        )
     if flashinfer:
         import torch
         from flashinfer.gdn_prefill import chunk_gated_delta_rule as fi_gdn
@@ -305,6 +314,12 @@ def configure_stateless_prefill(model, config):
     if not current_platform.is_cuda():
         raise ValueError("Stateless CLEF currently requires NVIDIA CUDA")
     _install_hooks()
+    if (config.additional_config or {}).get("clef_shared_input_quant", False):
+        from .shared_input_quant import configure as configure_shared_quant
+        configure_shared_quant(model)
+    if (config.additional_config or {}).get("clef_gdn_norm_quant", False):
+        from .gdn_norm_quant import install as install_norm_quant
+        install_norm_quant()
     recurrent = full = 0
     for layer in model.modules():
         if isinstance(layer, GDN):
@@ -313,6 +328,10 @@ def configure_stateless_prefill(model, config):
             if layer.gdn_prefill_backend == 'flashinfer' and not current_platform.is_device_capability(90):
                 raise ValueError('Stateless FlashInfer is currently validated only on SM90')
             layer._clef_stateless = True
+            layer._clef_fused_conv_prep = bool(
+                (config.additional_config or {}).get("clef_fused_conv_prep", False))
+            layer._clef_gdn_norm_quant = bool(
+                (config.additional_config or {}).get("clef_gdn_norm_quant", False))
             layer.kv_cache = ()
             layer.enable_fused_gdn_decode = False
             layer.enable_packed_recurrent_decode = False
@@ -325,5 +344,7 @@ def configure_stateless_prefill(model, config):
             layer.attn_type = layer.impl.attn_type = AttentionType.ENCODER_ONLY
             layer.impl._clef_stateless = True
             full += 1
-    if not recurrent or not full:
-        raise ValueError("Expected a hybrid model with recurrent and full-attention layers")
+    expected = config.model_config.hf_text_config.layer_types
+    if (recurrent != expected.count("linear_attention")
+            or full != expected.count("full_attention") or not recurrent):
+        raise ValueError("Attention modules do not match the requested model prefix")

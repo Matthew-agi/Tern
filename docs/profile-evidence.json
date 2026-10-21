@@ -70,6 +70,68 @@
     "input_tokens_per_repeat": 580694
   },
   "h100": {
+    "checkpoint_step": 163,
+    "parent_checkpoint_step": 1674,
+    "gpu": "NVIDIA H100 PCIe 80GB",
+    "launch_source": "tern-top4-50m-20261020/evaluation/evidence/depth40/command.json",
+    "launch_sha256": "7cad014fa51b0e81e987a17f10ef7a890f24ace03a33108cff9a98a0590de4cc",
+    "policy": {
+      "experts": 4,
+      "normalization_reference": 8,
+      "exit_layer": 40
+    },
+    "backend_flags": [
+      "--served-model-name",
+      "tern",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8101",
+      "--runner",
+      "pooling",
+      "--pooler-config",
+      "{\"task\":\"classify\"}",
+      "--dtype",
+      "bfloat16",
+      "--max-model-len",
+      "32768",
+      "--max-num-batched-tokens",
+      "65536",
+      "--max-num-seqs",
+      "256",
+      "--no-enable-chunked-prefill",
+      "--no-enable-prefix-caching",
+      "--no-async-scheduling",
+      "--skip-tokenizer-init",
+      "--mamba-cache-mode",
+      "none",
+      "--attention-backend",
+      "FLASH_ATTN",
+      "--moe-backend",
+      "triton",
+      "--additional-config",
+      "{\"gdn_prefill_backend\": \"flashinfer\", \"clef_stateless_prefill\": true, \"clef_fused_conv_prep\": true, \"clef_gdn_norm_quant\": true, \"clef_shared_input_quant\": true}",
+      "--compilation-config",
+      "{\"cudagraph_mode\": \"PIECEWISE\", \"cudagraph_capture_sizes\": [128, 256, 512, 1024, 2048, 4096, 6144, 8192, 12288, 16384], \"max_cudagraph_capture_size\": 16384, \"cudagraph_specialize_lora\": false}",
+      "--seed",
+      "20261012",
+      "--disable-uvicorn-access-log",
+      "--kernel-config",
+      "{\"enable_jit_warmup\":false}",
+      "--quantization",
+      "fp8_per_channel",
+      "--hf-overrides",
+      "{\"clef_runtime_optimizations\": {\"batch_head\": true, \"head_batch_size\": 32, \"head_batch_tokens\": 32768, \"packed_head_projection\": true, \"compiled_scores\": true, \"vectorized_scores\": true, \"compiled_blocks\": true, \"flat_kv_projection\": true, \"vectorized_summaries\": true, \"segmented_spans\": true}, \"num_experts_per_tok\": 4}"
+    ],
+    "omitted_flags": "Only profiler-config (output destination) omitted; no profiler is active in ordinary serving.",
+    "environment": {
+      "TERN_H100_ROWWISE_GEMM": "1",
+      "CLEF_REFERENCE_ROUTER_SELECT": "1",
+      "CUBLAS_WORKSPACE_CONFIG": ":4096:8"
+    }
+  },
+  "scope": "Historical evidence, not tests of this new package. A100 final checkpoint; H100 checkpoint 624. No benchmark inputs or predictions included.",
+  "h100-step624-historical": {
     "checkpoint_step": 624,
     "gpu": "NVIDIA H100 PCIe",
     "launch_source": "h100-step624-20261015/measurements/merged-tuned-combined/launch.json",
@@ -164,6 +226,5 @@
       "process_mean_cpu_cores": 1.5983793201259666,
       "host_mean_busy_percent": 6.451273290756476
     }
-  },
-  "scope": "Historical evidence, not tests of this new package. A100 final checkpoint; H100 checkpoint 624. No benchmark inputs or predictions included."
+  }
 }

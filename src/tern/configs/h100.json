@@ -10,9 +10,25 @@
   "expert_act_quant_fusion": true,
   "concurrency": 256,
   "tuning": "h100",
-  "validation": "Highest measured full-depth/top8 H100 path at checkpoint 624, not final checkpoint 1674. FP8 and packed-head arithmetic can change probabilities. Final checkpoint validation pending.",
-  "batch_tokens": 32768,
+  "validation": "Integrated optimized H100 FP8 path from the October 20-21 campaign. Original and trained checkpoints have separate quality results. New package requires GPU acceptance testing; FP8 and reduced execution can change probabilities.",
+  "batch_tokens": 65536,
   "max_model_len": 32768,
   "max_seqs": 256,
-  "capture_tokens": 16384
+  "capture_tokens": 16384,
+  "cublas_workspace_config": ":4096:8",
+  "h100_rowwise_gemm": true,
+  "reference_router_select": true,
+  "head_optimizations": {
+    "compiled_scores": true,
+    "vectorized_scores": true,
+    "compiled_blocks": true,
+    "flat_kv_projection": true,
+    "vectorized_summaries": true,
+    "segmented_spans": true
+  },
+  "additional_config": {
+    "clef_fused_conv_prep": true,
+    "clef_gdn_norm_quant": true,
+    "clef_shared_input_quant": true
+  }
 }

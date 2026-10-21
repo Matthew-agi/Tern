@@ -1,0 +1,30 @@
+{
+  "source": "Saved H100 campaign20261020, corrected trained4 depth40",
+  "files": {
+    "stateless_contract.py": "82ad419bc46dc74a630b6df4628387ffd0482092d446b3b090ef0df5c0808bca",
+    "expert_act_quant.py": "7f78d7ab9f31b13137d9ac0dfefbd213bc773c3c57c584f5d9c843742c8f4f55",
+    "head_vectorized.py": "318147b3bc761a7e1cc983c278c45f8a0c31d4e80a1a2640f7c86f79185a89d4",
+    "conv_prep_fused.py": "5542496a8ddf9e09c4e190c11a3a4d0a3d79cfe38aada5522998da0aa9094ec4",
+    "clef_batched.py": "ff548ec89803b99899982fe2ef4bbfecbbeaada1641bb69574784b0e042a61dc",
+    "stateless_kernels.py": "113914d1b028016c0683581b3090a35919eb5f5e30948995c9f9b3ed3f65e155",
+    "stateless_prefill.py": "2c61a3817d0a6cd2bbb5bcb9f900d7be10b34729b0ae5d21f341dde62c2058bd",
+    "__init__.py": "91a9efe5664f845567258b78ce79af753bd52e74c500f9b80f64fb7fd69f52a3",
+    "tokenization.py": "d3f4be165f3bd9bd9ee2be6371a58364c5abebb2c5107cc356a07225419f5fed",
+    "dense_fp8.py": "2a83f136631ab88a0269dbb07835ef51f1dd86b078e214ff528f33c1c8252ce2",
+    "submission_pipeline.py": "46a7c25d212dc275355253fa3996d16d9588a0eb50e7e1b0e0901d1f62f57595",
+    "clef_encoding.py": "55033f104f4f4ac3e047d62aadf64ce8c83d4971f5ae17518a95b79574eaca3c",
+    "compact_lora.py": "d1573ffedc8a35af1c8afbef7b32c623a3eeeff3c67e84b950d6be78d6c80ad0",
+    "clef_model.py": "c2bc58cdaa7e0e298b3a1b05b27812c911eb7b8ecac3c83b12843eff08ba7bc2",
+    "clef_schema.py": "92c9f79201d411d26efea2181912bd0d998a3a978070da8b68abdac475677073",
+    "_stateless_triton.py": "fa248ba1016e27d31d04c74adae1b57efc1a679cf765348ecd3ce137c2bdba28",
+    "head_kernels.py": "e7faecabdd011e070c132c0fbe5ee9d2730f6cd2e0aba559fbd82ca419f2f836",
+    "gdn_norm_quant.py": "29bc2606efa0e4b1ebe986fefdadb6953b50c5b6337cf6ace3b2f0c0a9262e84",
+    "expert_reference_routing.py": "db4ccf1a74a4163921a97214cb4828bbb2ec893fe29cfddc79c4251da89479b8",
+    "clef_head_graph.py": "d42e9679004a95872490f31f640c3615b53d37b798f86509113f76e49bc632de",
+    "schema_cache.py": "a3c79e9aa3e1473a22bca097bd46aed5ff65325c64adc3717461ae7495210696",
+    "batch_encoding.py": "1d8f556f8ffba33bf3af6165f3e2944e4adf38c587f639282e120e5cf4056db2",
+    "shared_input_quant.py": "eee4860075d88e818c7eb6421ebd03b6700f5f569167d422c4f09f1b286eea15",
+    "routing_top8.py": "7ab450cf00a5a513e6a6b4fe5d980c5da51e442dac0576bda36c9cac0b470284"
+  },
+  "note": "Hashes identify saved experiment sources before integration. Current integrated hashes are in frozen-runtime-sha256.json; the pre-change runtime is in baseline-runtime-sha256.json."
+}

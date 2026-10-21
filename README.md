@@ -5,9 +5,11 @@ Qwen3.6-35B-A3B backbone. One request supplies a state and named questions with
 their complete answer options. Tern returns every decision in one forward pass;
 it does not generate text.
 
-This repo packages the final **step-1674, 40-layer, top-8** model's frozen runtime.
-The numerical Python files are byte-preserved and checked in CI. Weights and the
-trained head live together on [Hugging Face](https://huggingface.co/matthewagi/Tern-35B-A3B),
+This repo defaults to the final **step-1674, 40-layer, top-8** model. It also
+supports explicit expert-count pruning, unconditional early exit and the pinned
+trained 4/8 continuation. The original head definition, encoding and scoring API
+are preserved; optimized execution sources are versioned and checked in CI.
+Weights and the trained head live together on [Hugging Face](https://huggingface.co/matthewagi/Tern-35B-A3B),
 pinned by revision and SHA-256. Code is Apache-2.0; the owner has selected
 Apache-2.0 for Tern. Original dependency notices and [training disclosures](docs/training-disclosure.md)
 are retained. This repo does not change Hub visibility or submit benchmark results.
@@ -15,7 +17,7 @@ are retained. This repo does not change Hub visibility or submit benchmark resul
 **Tested on RTX PRO 6000 Blackwell 96GB:** a fresh Docker build, GPU kernel checks,
 HTTP protocol, and warmed latency/throughput completed. [Numerical limits](docs/rtx-validation.md)
 remain: serial repeats were exact, but cross-GPU and cross-batch outputs differed.
-The default Docker launcher includes the cuBLAS workspace fix automatically. A100/H100 profiles reproduce recorded launch settings with the evidence limits below.
+The default Docker launcher includes the cuBLAS workspace fix automatically. The A100 profile preserves its recorded settings. The updated H100 profile integrates the final campaign kernels; this branch still needs packaged GPU validation.
 
 ## Start on RTX PRO 6000
 
@@ -62,20 +64,38 @@ TERN_PROFILE=h100-bf16 TERN_GPU=0 docker compose up --build
 |---|---|---:|---|
 | `rtx-pro-6000` (default) | BF16, Triton recurrent kernels, original head batching | 34,787 tok/s mean of 3 warmed bursts | Final step 1674; [deployment test and numerical differences](docs/rtx-validation.md), not private Index acceptance |
 | `a100` | BF16, A100 tuned MoE tiles | 24,514 tok/s matched panel | A100 SXM4 80GB, final step 1674; measured before this repackaging |
-| `h100` | Load-time FP8, FlashInfer recurrent kernels, fused activation quantization, packed head, H100 tuned tiles | 45,010 tok/s matched panel; 47,109 sustained | H100 PCIe 80GB, **step 624**; not final-checkpoint throughput or parity |
+| `h100` | FP8, FlashInfer, tuned MoE, fused preparation/quantization, compiled and vectorized head | 56,259 tok/s original 8/8; 65,509 trained 4/8; 84,475 trained 4/8 at layer 30 | H100 PCIe 80GB, final campaign; historical measurements before this packaging |
 | `h100-bf16` | BF16 reference with original head batching | Unmeasured | Control for checking the H100 FP8 profile on final weights |
 
-All use 32,768 batch/context tokens, 256 sequences, 16,384-token piecewise CUDA
-graphs and stateless complete-prefill execution. The known winning client loads
+All use 32,768 context tokens, 256 sequences, 16,384-token piecewise CUDA
+graphs and stateless complete-prefill execution. H100 uses a 65,536-token batch budget;
+other profiles use 32,768. The known winning client loads
 are 128 concurrent requests on A100 and 256 on H100. Client concurrency is not a
 server flag. See [exact settings and conversions](docs/deployment.md) and
 [recorded evidence](docs/profile-evidence.json).
 
-The H100 profile keeps the architecture, head, depth and expert count, but **FP8
-conversion and packed-head arithmetic can change probabilities**. It is an
-explicit personal performance-test profile. Default RTX/A100 execution retains
-the frozen BF16 path. No pruning, early exit, Kestrel replacement, result cache
-or unqualified kernel optimization is enabled.
+The H100 profile preserves the learned operations but FP8, fusion and changed
+execution grouping can change probabilities. Expert pruning and early exit are
+explicit model choices with their own quality tradeoffs. Default RTX/A100
+execution retains the BF16 path.
+
+## Choose expert count and exit depth
+
+```bash
+TERN_PROFILE=h100 TERN_EXPERTS=4 docker compose up --build
+TERN_PROFILE=h100 TERN_EXPERTS=6 TERN_EXIT_LAYER=30 docker compose up --build
+```
+
+Native equivalents are `tern serve --profile h100 --experts 4` and
+`tern serve --profile h100 --experts 6 --exit-layer 30`. Routing retains top-8
+normalization by default. Exit is unconditional and keeps the original final norm
+and head. These choices also work with the A100/RTX profiles, with GPU validation
+required for new combinations.
+
+For the **trained** 4/8 rows, add `--adapter top4-50m` (or `TERN_ADAPTER=top4-50m`)
+with access to the private HF adapter. This automatically merges the pinned LoRA
+and trained head, and defaults to four experts. Pruning alone uses original
+weights. See [execution policies, commands and measurement scope](docs/execution-policies.md).
 
 ## Native installation and testing
 
@@ -116,7 +136,7 @@ Directory layout:
 
 ```text
 src/tern/          CLI, lifecycle, profiles, artifact verification, benchmark client
-src/kev_vllm/      Frozen model, joint head, encoding, kernels and vLLM plugin
+src/kev_vllm/      Model, joint head, encoding, source-checked kernels and vLLM plugin
 src/serve_clef_api.py  Frozen SystemOne API; Tern wrapper changes only service identity
 examples/          Synthetic request (no benchmark inputs)
 tests/             CPU contracts and packaging checks

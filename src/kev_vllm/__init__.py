@@ -3,7 +3,11 @@ def register():
     if os.environ.get('CLEF_EXPERT_ACT_QUANT_FUSION') == '1':
         from .expert_act_quant import install
         install()
-    if os.environ.get('CLEF_ACTIVE_EXPERTS', '8') != '8':
+    if os.environ.get('TERN_H100_ROWWISE_GEMM') == '1':
+        from .dense_fp8 import install as install_dense
+        install_dense()
+    if (os.environ.get('CLEF_ACTIVE_EXPERTS', '8') != '8'
+            or os.environ.get('CLEF_NORMALIZATION_REFERENCE', '8') != '8'):
         from .expert_reference_routing import install as install_reference_routing
         install_reference_routing()
     from vllm import ModelRegistry

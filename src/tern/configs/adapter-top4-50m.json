@@ -1,0 +1,20 @@
+{
+  "id": "top4-50m",
+  "repository": "matthewagi/Tern-35B-A3B-top4-ref8-50M-LoRA",
+  "revision": "7802373d15179be693b1156584d438666b591608",
+  "parent_revision": "05db86f1d322fd1eec865f769a04e6ddeabb8187",
+  "checkpoint_step": 163,
+  "tokens": 49999879,
+  "tensor_count": 522,
+  "head_tensor_count": 122,
+  "files": {
+    "checkpoint/trainable.safetensors": {
+      "bytes": 917798416,
+      "sha256": "82d364ed71171074fd30338edd9f817f954081c353d9337be874c1e1a809b426"
+    },
+    "checkpoint/cursor.json": {
+      "bytes": 1725,
+      "sha256": "76924c9f8dcddb6a4d6ed4ab3d35e27f9b2a9f2f1d48d96937a196d97a11c052"
+    }
+  }
+}

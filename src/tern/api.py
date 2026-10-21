@@ -1,5 +1,6 @@
 """Public Tern identity around the byte-preserved scoring API."""
 import os
+import json
 from fastapi import HTTPException
 import serve_clef_api as frozen
 
@@ -14,4 +15,6 @@ async def ready():
     from pathlib import Path
     if not Path(os.environ["TERN_READY_FILE"]).exists():
         raise HTTPException(503, "Tern is warming up")
-    return await frozen.health()
+    result = await frozen.health()
+    return {**result, "execution_policy": json.loads(os.environ.get("TERN_EXECUTION_POLICY", "{}")),
+            "artifact": os.environ.get("TERN_ARTIFACT_KEY")}

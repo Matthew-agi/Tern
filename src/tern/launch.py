@@ -96,6 +96,12 @@ def stop_processes(processes):
 
 
 def serve(args):
+    from .policy import ExecutionPolicy
+    from .adapters import adapter_spec, artifact_key, prepare_adapter
+    policy = ExecutionPolicy.from_args(args)
+    adapter = getattr(args, "adapter", None)
+    if adapter:
+        adapter_spec(adapter)
     p = profile(args.profile)
     print(p["validation"], flush=True)
     gpu = inspect_gpu(args.gpu, p)
@@ -103,6 +109,8 @@ def serve(args):
     from .preflight import check_runtime
     check_runtime()
     model = download(args.cache_dir, args.model)
+    if adapter:
+        model = prepare_adapter(model, args.cache_dir, adapter)
     # Recheck after a potentially long download before starting GPU work.
     inspect_gpu(gpu["uuid"], p)
     processes = []
@@ -112,12 +120,15 @@ def serve(args):
     try:
         with tempfile.TemporaryDirectory(prefix="tern-") as temp:
             ready = Path(temp) / "ready"
-            cache = Path(args.cache_dir).expanduser().resolve() / p["id"]
+            cache = Path(args.cache_dir).expanduser().resolve() / p["id"] / artifact_key(adapter) / policy.cache_key
             cache.mkdir(parents=True, exist_ok=True)
-            env = worker_environment(p, model, cache, args.backend_port, "tern", gpu["uuid"])
+            env = worker_environment(p, model, cache, args.backend_port, "tern", gpu["uuid"], policy)
             env["TERN_READY_FILE"] = str(ready)
-            command = backend_command(p, model, args.backend_port, "tern")
+            env["TERN_EXECUTION_POLICY"] = json.dumps(policy.as_dict())
+            env["TERN_ARTIFACT_KEY"] = artifact_key(adapter)
+            command = backend_command(p, model, args.backend_port, "tern", policy)
             print(json.dumps({"profile": p, "gpu": gpu, "release_revision": release()["revision"],
+                              "policy": policy.as_dict(), "adapter": adapter_spec(adapter) if adapter else None,
                               "backend_command": command}), flush=True)
             processes.append(subprocess.Popen(command, env=env, start_new_session=True))
             wait_health(f"http://127.0.0.1:{args.backend_port}/health", processes, args.startup_timeout)

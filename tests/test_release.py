@@ -10,7 +10,7 @@ from tern.config import CONFIGS, PROFILES, backend_command, profile, release, wo
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_frozen_numerical_sources_are_unchanged():
+def test_versioned_runtime_source_manifest():
     manifest = json.loads((ROOT / "docs/frozen-runtime-sha256.json").read_text())
     actual_files = {str(p.relative_to(ROOT / "src")) for p in (ROOT / "src/kev_vllm").rglob("*")
                     if p.is_file() and "__pycache__" not in p.parts}
@@ -37,7 +37,9 @@ def flags(command):
 @pytest.mark.parametrize("name", ["a100", "h100"])
 def test_profiles_match_recorded_launch_arguments(name):
     evidence = json.loads((ROOT / "docs/profile-evidence.json").read_text())[name]
-    generated = backend_command(profile(name), "MODEL", 8101, "tern")
+    from tern.policy import ExecutionPolicy
+    generated = backend_command(profile(name), "MODEL", 8101, "tern",
+                                ExecutionPolicy(**evidence.get("policy", {})))
     assert flags(generated[generated.index("--served-model-name"):]) == flags(evidence["backend_flags"])
 
 
@@ -123,3 +125,13 @@ def test_rtx_worker_pins_workspace_despite_inherited_setting(monkeypatch, tmp_pa
     monkeypatch.setenv("CUBLAS_WORKSPACE_CONFIG", ":16:8")
     env = worker_environment(profile("rtx-pro-6000"), tmp_path / "model", tmp_path, 8101, "tern", "0")
     assert env["CUBLAS_WORKSPACE_CONFIG"] == ":4096:8"
+
+
+def test_original_head_encoding_and_api_are_preserved():
+    baseline = json.loads((ROOT / "docs/baseline-runtime-sha256.json").read_text())
+    for name in ("kev_vllm/clef_schema.py", "kev_vllm/clef_encoding.py", "kev_vllm/tokenization.py", "serve_clef_api.py"):
+        assert hashlib.sha256((ROOT / "src" / name).read_bytes()).hexdigest() == baseline[name]
+
+
+def test_bundled_layer_layout_is_from_pinned_checkpoint():
+    assert hashlib.sha256((CONFIGS / "model-config.json").read_bytes()).hexdigest() == release()["files"]["config.json"]["sha256"]

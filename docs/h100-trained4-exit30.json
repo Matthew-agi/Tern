@@ -1,0 +1,118 @@
+{
+  "variant": "trained50m-top4-exit30-routerselect-batch64-sharedquant-torchdense-flatkv-normquant-convprep-headcompile-blockcompile-summary-spans-workspace",
+  "new_checkpoint": 163,
+  "parent_checkpoint": 1674,
+  "training_tokens": 49999879,
+  "quality_requests": 1827,
+  "quality_scope": "Matched public development sample across43 benchmarks, not full/private Decision Index. Continuation used mixed replay data; not a held-out generalization claim.",
+  "sample_index": {
+    "original8": 60.13,
+    "original_pruned4": 56.29,
+    "trained4": 55.41,
+    "gain_vs_pruned4": -0.8800000000000026,
+    "delta_vs_original8": -4.720000000000006,
+    "fraction_of_pruning_gap_recovered": -0.22916666666666713
+  },
+  "brier_gap_recovered_fraction": -5.563834447353932,
+  "accuracy_gap_recovered_fraction": -3.279069767441889,
+  "paired_quality": {
+    "matched_top8": {
+      "fields": 10703,
+      "clusters": 1350,
+      "reference_brier": 0.10543930304313935,
+      "candidate_brier": 0.15487299449736125,
+      "reference_accuracy": 0.9336634588433149,
+      "candidate_accuracy": 0.9164720171914417,
+      "brier_delta": 0.049433691454222,
+      "accuracy_delta": -0.017191441651873307,
+      "brier_delta_95ci": [
+        0.04516681004675077,
+        0.053342506759924115
+      ],
+      "accuracy_delta_95ci": [
+        -0.021175643478692694,
+        -0.01347038522068746
+      ]
+    },
+    "original_pruned4": {
+      "fields": 10703,
+      "clusters": 1350,
+      "reference_brier": 0.11297052459522314,
+      "candidate_brier": 0.15487299449736125,
+      "reference_accuracy": 0.9296458936746707,
+      "candidate_accuracy": 0.9164720171914417,
+      "brier_delta": 0.04190246990213799,
+      "accuracy_delta": -0.013173876483229001,
+      "brier_delta_95ci": [
+        0.03811341341078589,
+        0.04529742480681075
+      ],
+      "accuracy_delta_95ci": [
+        -0.016701461377870562,
+        -0.009878114805463262
+      ]
+    },
+    "trained4_depth40": {
+      "fields": 10703,
+      "clusters": 1350,
+      "reference_brier": 0.1142941134496008,
+      "candidate_brier": 0.15487299449736125,
+      "reference_accuracy": 0.9306736429038587,
+      "candidate_accuracy": 0.9164720171914417,
+      "brier_delta": 0.04057888104776055,
+      "accuracy_delta": -0.01420162571241708,
+      "brier_delta_95ci": [
+        0.03716899317459778,
+        0.04364310314523878
+      ],
+      "accuracy_delta_95ci": [
+        -0.01761743955314105,
+        -0.011141512091660493
+      ]
+    }
+  },
+  "throughput": {
+    "input_tokens_per_second": 84475.33639882597,
+    "repeat_tok_s": [
+      83097.41720429988,
+      85787.99304429155,
+      84583.67150608066
+    ],
+    "cost_per_m_input_tokens": 0.007727436262530824,
+    "original8_tok_s": 56258.89454732039,
+    "original_pruned4_tok_s": 65891.31163139296,
+    "change_vs_pruned4_pct": 28.204059544898954,
+    "hourly_usd": 2.35,
+    "scope": "Same257 requests/580694 input tokens; three warmed client wall-time repetitions, concurrency256; excludes loading, compilation and idle time."
+  },
+  "warmth_audit": {
+    "runs": [
+      {
+        "run": "repeat-1",
+        "new_cache_json_files": 0,
+        "paths": []
+      },
+      {
+        "run": "repeat-2",
+        "new_cache_json_files": 0,
+        "paths": []
+      },
+      {
+        "run": "repeat-3",
+        "new_cache_json_files": 0,
+        "paths": []
+      }
+    ],
+    "no_new_cache_json_during_timed_runs": true,
+    "note": "Cache writes are a conservative compilation indicator; this is not a trace of every Python/JIT dispatch."
+  },
+  "serial_repeatability": {
+    "requests": 32,
+    "decisions": 261,
+    "argmax_changes": 0,
+    "maximum_probability_difference": 0.0,
+    "mean_probability_difference": 0.0,
+    "mean_total_variation": 0.0,
+    "scope": "Paired outputs, not ground-truth quality or a relaxed numerical acceptance gate."
+  }
+}

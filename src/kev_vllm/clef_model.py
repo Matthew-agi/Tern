@@ -28,6 +28,14 @@ class ClefPooler(Pooler):
         self.head_batch_tokens = int(optimizations.get("head_batch_tokens", 16384))
         self.head = JointSchemaHead(**config.clef_head).float().eval()
         self.head.clef_packed_projection = bool(optimizations.get("packed_head_projection", False))
+        self.head.clef_vectorized_scores = bool(optimizations.get("vectorized_scores", False))
+        self.head.clef_compiled_scores = bool(optimizations.get("compiled_scores", False))
+        self.head.clef_compiled_blocks = bool(optimizations.get("compiled_blocks", False))
+        self.head.clef_flat_kv_projection = bool(optimizations.get("flat_kv_projection", False))
+        if self.head.clef_flat_kv_projection and not self.head.clef_compiled_blocks:
+            raise ValueError("Flat KV projection requires compiled head blocks")
+        self.head.clef_vectorized_summaries = bool(optimizations.get("vectorized_summaries", False))
+        self.head.clef_segmented_spans = bool(optimizations.get("segmented_spans", False))
         self.head.clef_lexical_cache_entries = int(optimizations.get("lexical_cache_entries", 0))
         self.head.clef_head_graph_entries = int(optimizations.get("head_graph_entries", 0))
         self.head.clef_schema_cache_entries = int(optimizations.get("schema_cache_entries", 0))
@@ -117,7 +125,11 @@ class ClefPooler(Pooler):
                                  or self.head.clef_packed_projection or self.head.clef_lexical_cache_entries):
                     logits = forward_group(self.head, [j[1] for j in subset], [j[2] for j in subset],
                                            [j[3] for j in subset], self.output_weight)
-                    probabilities = torch.cat([z.float().softmax(-1) for z in logits], dim=-1)
+                    if self.head.clef_vectorized_scores:
+                        from .head_vectorized import probabilities as field_probabilities
+                        probabilities = field_probabilities(logits)
+                    else:
+                        probabilities = torch.cat([z.float().softmax(-1) for z in logits], dim=-1)
                     for j, probability in zip(subset, probabilities):
                         output[j[0]] = probability
                     continue
@@ -144,19 +156,24 @@ class ClefPooler(Pooler):
 class ClefQwenMoeForPooling(as_embedding_model(Qwen3_5MoeForCausalLM)):
     is_3d_moe_weight = True
     def _init_pooler(self, vllm_config, prefix=""):
+        config = vllm_config.model_config.hf_text_config
+        exit_layer = getattr(config, "clef_unconditional_exit_layer", None)
+        if exit_layer is not None:
+            if (not 1 <= exit_layer <= 40 or config.num_hidden_layers != exit_layer
+                    or len(self.model.layers) != exit_layer
+                    or len(config.layer_types) != exit_layer):
+                raise ValueError("Unconditional exit requires exactly the requested layer prefix")
+            print(f"TERN unconditional exit: first {exit_layer} layers, original final norm and head", flush=True)
         from .stateless_prefill import configure_stateless_prefill
         configure_stateless_prefill(self, vllm_config)
         return ClefPooler(vllm_config)
 
     def load_weights(self, weights):
+        exit_layer = getattr(self.config, "clef_unconditional_exit_layer", None)
+        from .checkpoint import PoolingWeights
+        audited = PoolingWeights(weights, self.pooler.head.state_dict(), exit_layer)
         def checkpoint_weights():
-            for name,weight in weights:
-                if name.startswith("model.language_model."):
-                    name=name.replace("model.language_model.","model.",1)
-                elif name=="lm_head.weight":
-                    name="pooler.output_weight"
-                elif not name.startswith(("model.layers.","model.embed_tokens.","model.norm.","pooler.")):
-                    continue
+            for name, weight in audited:
                 if getattr(self.config,"clef_training_int8",False) and name.endswith((".experts.gate_up_proj",".experts.down_proj")):
                     # Match the frozen INT8 backbone used during training.
                     # Adapters are applied separately by vLLM's runtime LoRA.
@@ -165,4 +182,8 @@ class ClefQwenMoeForPooling(as_embedding_model(Qwen3_5MoeForCausalLM)):
                     q=(w/scale[:,None,None]).round().clamp(-127,127).to(torch.int8)
                     weight=(q.float()*scale[:,None,None]).to(torch.bfloat16)
                 yield name,weight
-        return super().load_weights(checkpoint_weights())
+        loaded = super().load_weights(checkpoint_weights())
+        audited.verify()
+        if exit_layer is not None:
+            print(f"TERN omitted checkpoint layers {exit_layer + 1}-40; retained original norm/head weights", flush=True)
+        return loaded

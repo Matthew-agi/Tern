@@ -11,7 +11,7 @@ The package registers `tern_pooler = kev_vllm:register` as a vLLM general plugin
 That plugin installs the frozen metadata transport and registers
 `ClefQwenMoeForPooling`. Encoding produces the exact original token sequence and
 question/option spans. The causal backbone processes the full input through all
-40 layers; the joint schema head uses hidden states, schema spans and the output
+40 layers by default (or the explicitly selected prefix); the joint schema head uses hidden states, schema spans and the output
 embedding to score every supplied option. The head is part of the pooling model,
 not a separate CPU classifier or a generative prompt.
 
@@ -20,13 +20,24 @@ The merged checkpoint already includes backbone adapters and
 precasts selected parameters to BF16 and uses BF16 autocast. The output embedding
 is retained because the trained head uses it. Changing it, the prompt, option
 ordering, head pooling, normalization or precision would change model behavior.
-No such refactoring was made here.
+The optimized profile preserves those learned operations while changing execution
+grouping; numerical differences require measurement.
 
-`src/serve_clef_api.py` and the entire copied numerical runtime remain byte-identical
-to the final packaged step-1674 runtime. `docs/frozen-runtime-sha256.json` records
-their hashes. A small wrapper sets the public model name to `tern` and adds a
-readiness endpoint; it does not rewrite probabilities or requests. Historical
-`kev_vllm`/CLEF names are intentional provenance and compatibility details.
+`src/serve_clef_api.py`, the original head definition and encoding remain
+byte-identical to the packaged step-1674 runtime. Their original hashes are in
+`docs/baseline-runtime-sha256.json`; `docs/frozen-runtime-sha256.json` pins the
+current integrated runtime. A small wrapper sets the public model name to
+`tern` and adds readiness metadata, without rewriting probabilities or requests.
+Historical `kev_vllm`/CLEF names preserve compatibility and provenance.
+
+`tern.policy.ExecutionPolicy` validates dynamic expert count, normalization mass
+and unconditional prefix depth independently of hardware profiles. It produces
+vLLM config overrides and explicit worker settings; checkpoint files are never
+edited for an ablation. The model loader audits head/output-embedding coverage
+and the skipped tail. `tern.adapters` is a separate CPU import path for the
+pinned continuation. It validates all trainable tensors, retains indexed head
+names, and atomically publishes a new verified cache. See
+[execution policies](execution-policies.md) for the exact semantics.
 
 Endpoints:
 

@@ -65,12 +65,21 @@ def score_prepared(head, normalized, memory, lengths_gpu, padding, spans, lexica
                    lexical_projected=None, lexical_normalized=None):
     batch = torch.arange(normalized.shape[0], device=normalized.device)
     global_vector = normalized[batch, lengths_gpu - 1]
-    pooled = span_means(normalized, spans)
+    if getattr(head, "clef_segmented_spans", False):
+        from .head_kernels import segmented_span_means
+        pooled = segmented_span_means(normalized, spans)
+    else:
+        pooled = span_means(normalized, spans)
     questions, contexts = pooled[:, :len(counts)], pooled[:, len(counts):]
     routed = (head.option_context_projection(contexts)
               + (head.option_lexical_projection(lexical) if lexical_projected is None else lexical_projected)
               + head.option_question_projection(questions)[:, field_indices])
     for layer in head.evidence_layers:
+        if getattr(head, "clef_compiled_blocks", False):
+            from .head_vectorized import compiled_block
+            kind = "evidence_flat" if getattr(head, "clef_flat_kv_projection", False) else "evidence"
+            routed = compiled_block(kind)(layer, routed, memory, padding)
+            continue
         queries = layer.query_norm(routed)
         normalized_memory = layer.memory_norm(memory)
         evidence, _ = layer.attention(queries, normalized_memory, normalized_memory,
@@ -80,16 +89,31 @@ def score_prepared(head, normalized, memory, lengths_gpu, padding, spans, lexica
 
     options = list(torch.split(routed, counts, dim=1))
     base_fields = head.question_projection(questions)
-    summaries = []
-    for i, opt in enumerate(options):
-        weights = torch.softmax(torch.bmm(opt, base_fields[:, i, :, None]).squeeze(-1)
-                                / math.sqrt(opt.shape[-1]), dim=-1)
-        summaries.append((weights.unsqueeze(-1) * opt).sum(dim=1))
-    fields = (base_fields + head.option_summary_norm(torch.stack(summaries, dim=1))
+    summaries = None
+    if getattr(head, "clef_vectorized_summaries", False):
+        from .head_vectorized import summarize_options
+        summaries = summarize_options(routed, base_fields, field_indices, counts)
+    if summaries is None:
+        per_field = []
+        for i, opt in enumerate(options):
+            weights = torch.softmax(torch.bmm(opt, base_fields[:, i, :, None]).squeeze(-1)
+                                    / math.sqrt(opt.shape[-1]), dim=-1)
+            per_field.append((weights.unsqueeze(-1) * opt).sum(dim=1))
+        summaries = torch.stack(per_field, dim=1)
+    fields = (base_fields + head.option_summary_norm(summaries)
               + head.global_projection(global_vector)[:, None] + head.type_embedding(types))
     for layer in head.layers:
-        fields = layer(fields, memory, memory_key_padding_mask=padding)
+        if getattr(head, "clef_compiled_blocks", False):
+            from .head_vectorized import compiled_block
+            kind = "field_flat" if getattr(head, "clef_flat_kv_projection", False) else "field"
+            fields = compiled_block(kind)(layer, fields, memory, padding)
+        else:
+            fields = layer(fields, memory, memory_key_padding_mask=padding)
     fields = head.field_norm(fields)
+    if getattr(head, "clef_vectorized_scores", False):
+        from .head_vectorized import score_options
+        return score_options(head, fields, routed, questions, global_vector,
+                             lexical, field_indices, counts, lexical_normalized)
     lexical_fields = torch.split(lexical if lexical_normalized is None else lexical_normalized, counts, dim=1)
     logits = []
     for i, (lex, opt) in enumerate(zip(lexical_fields, options)):

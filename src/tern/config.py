@@ -18,12 +18,17 @@ def profile(name):
     return json.loads((CONFIGS / f"{name}.json").read_text())
 
 
-def backend_command(p, model, backend_port, name):
+def backend_command(p, model, backend_port, name, policy=None):
+    from .policy import ExecutionPolicy
+    policy = policy or ExecutionPolicy()
     sizes = [128, 256, 512, 1024, 2048, 4096, 6144, 8192, 12288, 16384]
     head = {"batch_head": True, "head_batch_size": p["head_batch_size"],
             "head_batch_tokens": p["head_batch_tokens"]}
     if p["packed_head_projection"]:
         head["packed_head_projection"] = True
+    head.update(p.get("head_optimizations", {}))
+    additional = {"gdn_prefill_backend": p["gdn_backend"], "clef_stateless_prefill": True}
+    additional.update(p.get("additional_config", {}))
     cmd = [str(Path(sys.executable).parent / "vllm"), "serve", str(model),
            "--served-model-name", name, "--host", "127.0.0.1", "--port", str(backend_port),
            "--runner", "pooling", "--pooler-config", '{"task":"classify"}',
@@ -32,8 +37,7 @@ def backend_command(p, model, backend_port, name):
            "--max-num-seqs", str(p["max_seqs"]), "--no-enable-chunked-prefill",
            "--no-enable-prefix-caching", "--no-async-scheduling", "--skip-tokenizer-init",
            "--mamba-cache-mode", "none", "--attention-backend", "FLASH_ATTN",
-           "--moe-backend", "triton", "--additional-config", json.dumps({
-               "gdn_prefill_backend": p["gdn_backend"], "clef_stateless_prefill": True}),
+           "--moe-backend", "triton", "--additional-config", json.dumps(additional),
            "--compilation-config", json.dumps({"cudagraph_mode": "PIECEWISE",
                "cudagraph_capture_sizes": sizes, "max_cudagraph_capture_size": p["capture_tokens"],
                "cudagraph_specialize_lora": False}),
@@ -41,13 +45,15 @@ def backend_command(p, model, backend_port, name):
            '{"enable_jit_warmup":false}']
     if p["quantization"]:
         cmd += ["--quantization", p["quantization"]]
-    return cmd + ["--hf-overrides", json.dumps({"clef_runtime_optimizations": head})]
+    return cmd + ["--hf-overrides", json.dumps({"clef_runtime_optimizations": head, **policy.overrides()})]
 
 
-def worker_environment(p, model, cache, backend_port, name, gpu):
+def worker_environment(p, model, cache, backend_port, name, gpu, policy=None):
+    from .policy import ExecutionPolicy
+    policy = policy or ExecutionPolicy()
     # A shell left over from an ablation must not enable pruning or early exit.
     env = {k: v for k, v in os.environ.items()
-           if not k.startswith(("CLEF_", "VLLM_", "KESTREL_", "TORCH_COMPILE_"))}
+           if not k.startswith(("CLEF_", "VLLM_", "KESTREL_", "TORCH_COMPILE_", "TERN_H100_"))}
     cache = Path(cache).resolve()
     env.update(CUDA_VISIBLE_DEVICES=str(gpu), VLLM_PLUGINS="tern_pooler",
                VLLM_NO_USAGE_STATS="1", DO_NOT_TRACK="1", OMP_NUM_THREADS="1",
@@ -55,12 +61,17 @@ def worker_environment(p, model, cache, backend_port, name, gpu):
                VLLM_USE_V2_MODEL_RUNNER="0", CLEF_ROOT=str(model.parent),
                CLEF_MODEL=model.name, CLEF_BACKEND=f"http://127.0.0.1:{backend_port}",
                CLEF_MAX_LENGTH=str(p["max_model_len"]), CLEF_MAX_CONNECTIONS="128",
-               CLEF_SUBMISSION_MODE="single", CLEF_ACTIVE_EXPERTS="8",
+               CLEF_SUBMISSION_MODE="single", CLEF_ACTIVE_EXPERTS=str(policy.experts),
+               CLEF_NORMALIZATION_REFERENCE=str(policy.normalization_reference),
                CLEF_EXPERT_ACT_QUANT_FUSION=str(int(p["expert_act_quant_fusion"])),
                CLEF_PRECAST_HEAD="1", TERN_SERVED_MODEL_NAME=name,
                VLLM_CACHE_ROOT=str(cache / "vllm"), TRITON_CACHE_DIR=str(cache / "triton"),
                TORCHINDUCTOR_CACHE_DIR=str(cache / "inductor"),
                TORCH_EXTENSIONS_DIR=str(cache / "extensions"))
+    if p.get("h100_rowwise_gemm"):
+        env["TERN_H100_ROWWISE_GEMM"] = "1"
+    if p.get("reference_router_select") and policy.experts in (4, 6) and policy.normalization_reference == 8:
+        env["CLEF_REFERENCE_ROUTER_SELECT"] = "1"
     # Pin cuBLAS workspace selection before either worker imports CUDA.
     # This stabilizes RTX serial probabilities across fresh processes.
     if p.get("cublas_workspace_config"):
