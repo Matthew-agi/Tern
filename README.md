@@ -17,7 +17,7 @@ are retained. This repo does not change Hub visibility or submit benchmark resul
 **Tested on RTX PRO 6000 Blackwell 96GB:** a fresh Docker build, GPU kernel checks,
 HTTP protocol, and warmed latency/throughput completed. [Numerical limits](docs/rtx-validation.md)
 remain: serial repeats were exact, but cross-GPU and cross-batch outputs differed.
-The default Docker launcher includes the cuBLAS workspace fix automatically. The A100 profile preserves its recorded settings. The updated H100 profile integrates the final campaign kernels; this branch still needs packaged GPU validation.
+The default Docker launcher includes the cuBLAS workspace fix automatically. The A100 profile preserves its recorded settings. The optimized H100 profile and automatic continuation merge also passed a fresh packaged deployment on H100 SXM 80GB; see [H100 results and setup requirements](docs/h100-validation.md). All serving controls are available on `main`.
 
 ## Start on RTX PRO 6000
 
@@ -64,7 +64,7 @@ TERN_PROFILE=h100-bf16 TERN_GPU=0 docker compose up --build
 |---|---|---:|---|
 | `rtx-pro-6000` (default) | BF16, Triton recurrent kernels, original head batching | 34,787 tok/s mean of 3 warmed bursts | Final step 1674; [deployment test and numerical differences](docs/rtx-validation.md), not private Index acceptance |
 | `a100` | BF16, A100 tuned MoE tiles | 24,514 tok/s matched panel | A100 SXM4 80GB, final step 1674; measured before this repackaging |
-| `h100` | FP8, FlashInfer, tuned MoE, fused preparation/quantization, compiled and vectorized head | 56,259 tok/s original 8/8; 65,509 trained 4/8; 84,475 trained 4/8 at layer 30 | H100 PCIe 80GB, final campaign; historical measurements before this packaging |
+| `h100` | FP8, FlashInfer, fused preparation/quantization, compiled and vectorized head | 80,173 tok/s original 8/8; 95,244 trained 4/8; 115,498 trained 4/8 at layer 30 | Fresh H100 SXM 80GB deployment; [matched panel, costs and numerical limits](docs/h100-validation.md). Historical PCIe results remain separately documented |
 | `h100-bf16` | BF16 reference with original head batching | Unmeasured | Control for checking the H100 FP8 profile on final weights |
 
 All use 32,768 context tokens, 256 sequences, 16,384-token piecewise CUDA
@@ -83,11 +83,11 @@ execution retains the BF16 path.
 
 ```bash
 TERN_PROFILE=h100 TERN_EXPERTS=4 docker compose up --build
-TERN_PROFILE=h100 TERN_EXPERTS=6 TERN_EXIT_LAYER=30 docker compose up --build
+TERN_PROFILE=h100 TERN_EXPERTS=4 TERN_EXIT_LAYER=30 docker compose up --build
 ```
 
 Native equivalents are `tern serve --profile h100 --experts 4` and
-`tern serve --profile h100 --experts 6 --exit-layer 30`. Routing retains top-8
+`tern serve --profile h100 --experts 4 --exit-layer 30`. Routing retains top-8
 normalization by default. Exit is unconditional and keeps the original final norm
 and head. These choices also work with the A100/RTX profiles, with GPU validation
 required for new combinations.
@@ -95,7 +95,16 @@ required for new combinations.
 For the **trained** 4/8 rows, add `--adapter top4-50m` (or `TERN_ADAPTER=top4-50m`)
 with access to the private HF adapter. This automatically merges the pinned LoRA
 and trained head, and defaults to four experts. Pruning alone uses original
-weights. See [execution policies, commands and measurement scope](docs/execution-policies.md).
+weights. For an authorized account, put `HF_TOKEN` in an untracked `.env` file
+with restricted permissions, then run:
+
+```bash
+TERN_PROFILE=h100 TERN_ADAPTER=top4-50m TERN_EXPERTS=4 TERN_EXIT_LAYER=30 docker compose up --build
+```
+
+Omit `TERN_EXIT_LAYER=30` for all 40 layers. The public model does not require a
+token; the private continuation is a separate artifact. Stop the current service
+before switching configurations. See [execution policies, commands and measurement scope](docs/execution-policies.md).
 
 ## Native installation and testing
 
@@ -128,7 +137,7 @@ example proves API wiring; it is not a quality or performance benchmark.
 
 The [complete RTX public evaluation](docs/decision-index-rtx.md) scores **59.01 public / 68.93 raw**, with 140,176 successful requests, two declared capacity rejections and zero errors. Independent rescoring reproduced every score field. The original A100 result remains **59.10 / 69.04**. See the [model card](docs/model-card.md) for both runs.
 A separate corrected SGD auxiliary check scores **0.7033 macro-F1**; the frozen suite had an upstream dialogue-history bug. See the [disclosure](docs/decision-index-rtx.md#upstream-sgd-auxiliary-input-correction); the headline index is unaffected.
-This is not an accepted leaderboard placement or the private Full score.
+These historical public-run scores are distinct from any separately published Full score or leaderboard evaluation.
 Cross-batch numerical variation and training/development overlap are disclosed;
 we do not promise identical probabilities across batches or GPU types.
 
@@ -152,4 +161,4 @@ The [RTX deployment test](docs/rtx-validation.md) records a successful fresh Doc
 
 ## Decision Index submission
 
-The model, results and code are public. [Submission PR #227](https://github.com/apolinario/decision-index/pull/227) is open for review; leaderboard inclusion and private quality/latency checks remain pending.
+The model, results and code are public. [Submission PR #227](https://github.com/apolinario/decision-index/pull/227) is closed without merging (checked October 22, 2026). That PR status alone does not establish leaderboard inclusion or private evaluation results; consult the current Decision Index for those separately. The serving update does not alter the frozen submission artifacts.

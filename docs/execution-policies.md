@@ -118,6 +118,8 @@ Index; continuation data permits replay. Throughput uses 257 requests / 580,694
 encoded input tokens, concurrency 256 and three warmed repetitions, excluding
 startup, compilation and idle time. No throughput transfer to RTX/A100 is claimed.
 
+A subsequent [packaged H100 SXM deployment](h100-validation.md) exercised original 8/8, original 4/8, and trained 4/8, including depth-30 configurations. Its throughput measurements are separate from the historical PCIe table above.
+
 Local tests cover policy validation, exact prefix/tail handling, reference
 routing, head equations, merge arithmetic, head-key preservation, immutable base
 files, corruption rejection and interrupted-conversion cleanup. Before adopting

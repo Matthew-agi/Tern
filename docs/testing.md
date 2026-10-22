@@ -77,7 +77,7 @@ into a benchmark submission.
 - A100 frozen source and settings originate from the completed final evaluation.
 - H100 fast settings now originate from the final October 20-21 campaign; see [scope and results](execution-policies.md).
 - The new Docker image, RTX PRO 6000 startup, HTTP contract and warmed latency/throughput were tested on 2026-10-18. See [results and numerical limits](rtx-validation.md). Cross-GPU and cross-batch probability equivalence failed; serial repeats were exact.
-- This branch has CPU tests and historical GPU source provenance, but no new packaged GPU validation. The maintainers' private RTX acceptance is separate.
+- The packaged H100 path passed a fresh five-configuration deployment on October 22; see [H100 validation](h100-validation.md). This is separate from private benchmark acceptance.
 
 For RTX restart checks, compare fresh processes, not only repeated requests in one process. The [workspace investigation](numerical-reproducibility.md) records the fixed execution setting, rollback control, head hash checks and labeled smoke scope.
 
@@ -97,7 +97,4 @@ requests and mixed input lengths. Keep profiles and traces out of timed runs.
 Compare to saved reference predictions/tokens when available; rebuilding old
 baselines is not a prerequisite for preparing or inspecting this package.
 
-The new CUDA kernels and full 70GB continuation merge were not run on a GPU during
-this branch's local validation. CPU tensor fixtures verify the export arithmetic
-and key contract; the complete private-model merge and GPU serving remain an
-integration check on the next GPU host.
+The complete continuation merge and GPU serving were subsequently validated on H100 SXM; all 122 trained head tensors matched the checkpoint exactly. See [tested configurations and numerical limits](h100-validation.md). Other hardware/policy combinations still need matched validation.
